@@ -1,0 +1,199 @@
+								GRADER FILE
+===============================================================================
+cs61b: Data Structure
+project 3
+===============================================================================
+								-----------
+								| Parters |
+								-----------
+Name of student running submit: Calvin Cheng
+//Login of student running submit: cs61b-co
+
+Second team member's name: Max Rutman
+//Second team member's login: cs61b-wh 
+
+Third team member's name (if any): Scott Bertucci
+//Third team member's login: cs61b-pu
+
+==================================[Modules]====================================
+
+-------------| Hash Table/Hashing Functions
+|  Module 1  | Difficulty:
+-------------| Project Partner:
+
+1. Allows for hashing application's external vertices to internal vertices
+2. Resizing as necessary
+3. If object1.equals(object2), then object1.hashCode() == object2.hashCode()
+
+(from readme)
+[1]  A calling application can use any object whatsoever to be a "vertex" from
+     its point of view.  You will also need to have an internal object that
+     represents a vertex in a WUGraph and maintains its adjacency list; this
+     object is HIDDEN from the application.  Therefore, you will need a fast
+     way to map the application's vertex objects to your internal vertex
+     objects.  The best way to do this is to use the hash table you implemented
+     for Homework 6--modified so it resizes itself to keep the load factor
+     constant as |V| changes.  (You may NOT use Java's built-in hash tables.)
+     The hash table also makes it possible to support isVertex() in O(1) time.
+
+     In Java, every object has a hashCode() method.  The default hashCode()
+     is defined in the Object class, and hashes the _reference_ to the Object.
+     (This is not something you could do yourself, because Java does not give
+     you direct access to memory addresses.)  This means that for some classes,
+     two distinct objects can act as different keys, even if their fields are
+     identical.  However, many object classes such as Integer and String
+     override hashCode() so that items with the same fields are equals().
+     Recall that Java has a convention that if two objects are equals(), they
+     have the same hash code; defying this convention tends to break hash
+     tables badly.  For the purposes of this project, two objects provided by
+     the calling application represent the same vertex if they are equals().
+
+-------------------------------------------------------------------------------
+-------------| Lists
+|  Module 2  | Difficulty:
+-------------| Project Partner:
+
+Using list package from before, will comment out later...
+
+-------------------------------------------------------------------------------
+-------------| WU Graph Vertices
+|  Module 3  | Difficulty:
+-------------| Project Partner:
+
+Basically, all the methods having to do with vertices, including how to re-
+present them.
+
+O(1)   int vertexCount();           return the number of vertices in the graph.
+O(|V|) Object[] getVertices();             return an array of all the vertices.
+O(1)   void addVertex(Object);                       add a vertex to the graph.
+O(d)   void removeVertex(Object);               remove a vertex from the graph.
+O(1)   boolean isVertex(Object);          is this object a vertex of the graph?
+O(1)   int degree(Object);                       return the degree of a vertex.
+O(d)   Neighbors getNeighbors(Object);        return the neighbors of a vertex.
+
+(from readme)
+[2]  To support getVertices() in O(|V|) time, you will need to maintain a list
+     of vertices.  To support removeVertex() in O(d) time, the list of vertices
+     should be doubly-linked.  getVertices() returns the objects that were
+     provided by the calling application in calls to addVertex(), NOT the
+     WUGraph's internal vertex data structure(s), which should always be
+     hidden.  Hence, each internal vertex representation must include
+     a reference to the corresponding object that the calling application is
+     using as a vertex.
+
+     Alternatively, you could implement getVertices() by traversing your hash
+     table.  However, this runs in O(|V|) time ONLY if your hash table resizes
+     in both directions--specifically, it must shrink when the load factor
+     drops below a constant.  Otherwise, it will run too slowly if we add many
+     vertices to a graph (causing your table to grow very large) then remove
+     most of them.
+     
+[4]  Because a WUGraph is undirected, each edge (u, v) must appear in two
+     adjacency lists (unless u == v):  u's and v's.  If we remove u from the
+     graph, we must remove every edge incident on u from the adjacency lists
+     of u's neighbors.  To support removeVertex() in O(d) time, we cannot walk
+     through all these adjacency lists.  There are several ways you could
+     obtain O(d) time, and you may use any of these options:
+
+          [i]  Since (u, v) appears in two lists, we could use two nodes to
+               represent (u, v); one in u's list, and one in v's list.
+               Each of these nodes might be called a "half-edge," and each is
+               the other's "partner."  Each half-edge has forward and backward
+               references to link it into an adjacency list.  Each half-edge
+               also maintains a reference to its partner.  That way, when we
+               remove u from the graph, we can traverse u's adjacency list and
+               use the partner references to find and remove each half-edge's
+               partner from the adjacency lists of u's neighbors in O(1) time
+               per edge.  This option is illustrated in the accompanying
+               figure, pj3graph.ps or pj3graph.pdf (both figures are the same).
+         [ii]  You could use just one object to represent (u, v), but equip it
+               with two forward and two backward references.  However, you must
+               be careful to follow the right references as you traverse
+               a node's adjacency list.
+        [iii]  If you want to use an encapsulated DList class, you could use
+               just a single object to represent an edge, and put this object
+               into both adjacency lists.  The edge object contains two
+               DListNode references (signifying its position in each DList), so
+               it can extract itself from both adjacency lists in O(1) time.
+        (it may be worth while to see [5])
+               
+[6]  To support vertexCount(), edgeCount(), and degree() in O(1) time, you will
+     need to maintain counts of the vertices, the edges, and the degree of each
+     vertex, and keep these counts updated with every operation.
+
+-------------------------------------------------------------------------------
+-------------| WU Graph Edges
+|  Module 4  | Difficulty:
+-------------| Project Partner:
+
+Basically, all the methods having to do with edges, including how to re-
+present them.
+
+O(1)   int edgeCount();                return the number of edges in the graph.
+O(1)   void addEdge(Object, Object, int);      add an edge of specified weight.
+O(1)   void removeEdge(Object, Object);          remove an edge from the graph.
+O(1)   boolean isEdge(Object, Object);               is this edge in the graph?
+O(1)   int weight(Object, Object);              return the weight of this edge.
+
+(from readme)
+[3]  To support getNeighbors() in O(d) time, you will need to maintain an
+     adjacency list of edges for each vertex.  To support removeEdge() in O(1)
+     time, each list of edges must be doubly-linked.
+     
+[5]  To support removeEdge(), isEdge(), and weight() in O(1) time, you will
+     need a _second_ hash table for edges.  The second hash table maps an
+     unordered pair of objects (both representing application-supplied vertices
+     in the graph) to your internal edge data structure.  (If you are using
+     half-edges, following suggestion [4i] above, you could use the reference
+     from one half-edge to find the other.)  To help you hash an edge in a
+     manner that does not depend on the order of the two vertices, I have
+     provided a class VertexPair.java designed for use as a key in hash tables.
+     The methods VertexPair.hashCode and VertexPair.equals are written so that
+     (u, v) and (v, u) are considered to be equal keys with the same hash code.
+     Read them, but don't change them unless you know what you're doing.
+     We recommend you use the VertexPair class as the key for your edge hash
+     table.  However, you are not required to do so, and you may change
+     VertexPair.java freely to suit your needs.
+
+     (Technically, you don't need a second hash table; you could store vertices
+     and edges in the same table.  However, you risk confusing yourself; having
+     two separate hash tables eases debugging and reduces the likelihood of
+     human error.  But it's your decision.)
+
+     To support removeVertex() in O(d) time, you will need to remove the edges
+     incident on a vertex from the hash table as well as the adjacency lists.
+     You will also need to adjust the vertex degrees.  Hence, each edge or
+     half-edge should have references to the vertices it is incident on.
+     
+     (it may be worth while to see [4])
+     
+-------------------------------------------------------------------------------
+-------------| Empty Weighted, Undirected Graph
+|  Module 5  | Difficulty:
+-------------| Project Partner:
+
+O(1)   WUGraph();                construct a graph having no vertices or edges.
+
+-------------------------------------------------------------------------------
+-------------| Kruskal's Algorithm for Minimum Spanning Trees
+|  Module 6  | Difficulty:
+-------------| Project Partner: Calvin Cheng
+
+// All graph method are encapsulated; can only use:
+O(1)   WUGraph();                construct a graph having no vertices or edges.
+O(1)   int vertexCount();           return the number of vertices in the graph.
+O(1)   int edgeCount();                return the number of edges in the graph.
+O(|V|) Object[] getVertices();             return an array of all the vertices.
+O(1)   void addVertex(Object);                       add a vertex to the graph.
+O(d)   void removeVertex(Object);               remove a vertex from the graph.
+O(1)   boolean isVertex(Object);          is this object a vertex of the graph?
+O(1)   int degree(Object);                       return the degree of a vertex.
+O(d)   Neighbors getNeighbors(Object);        return the neighbors of a vertex.
+O(1)   void addEdge(Object, Object, int);      add an edge of specified weight.
+O(1)   void removeEdge(Object, Object);          remove an edge from the graph.
+O(1)   boolean isEdge(Object, Object);               is this edge in the graph?
+O(1)   int weight(Object, Object);              return the weight of this edge.
+
+
+     
+     
